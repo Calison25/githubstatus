@@ -1,0 +1,13 @@
+version: '3.6'
+services:
+  app:
+    container_name: github_status
+    build: .
+    volumes:
+      - .:/go/src
+    networks:
+      - github_status
+networks:
+  github_status:
+    name: github_status_github_status
+    driver: bridge
