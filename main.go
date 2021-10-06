@@ -3,24 +3,28 @@ package main
 import (
 	"fmt"
 	"github.com/gocolly/colly"
+	"githubstatus/service"
 	"strings"
 )
 
-type Githubstats struct {
-	SystemName   string
-	Systemstatus bool
+type GithubStatusInfo struct {
+	SystemName        string
+	SystemSlugname    string
+	SystemStatusLabel string
 }
 
 func main() {
 	collyCollector := colly.NewCollector()
-	var githubStatus []Githubstats
+	var githubStatus []GithubStatusInfo
 	collyCollector.OnHTML("div[data-component-id]", func(element *colly.HTMLElement) {
+		classAttribute := element.Attr("class")
 		systemNameFromHtml := element.DOM.Find("span.name").Text()
-		systemStatusFromHtml := element.DOM.Find("span.component-status").Text()
 		if len(systemNameFromHtml) > 0 && !strings.Contains(systemNameFromHtml, "Visit") {
-			newGithubStatus := Githubstats{
-				SystemName:   strings.TrimSpace(systemNameFromHtml),
-				Systemstatus: strings.Contains(systemStatusFromHtml, "Operational"),
+			slugnameFromClassAttribute := service.GetSystemSlugnameByClassAttribute(classAttribute)
+			newGithubStatus := GithubStatusInfo{
+				SystemName:        strings.TrimSpace(systemNameFromHtml),
+				SystemSlugname:    slugnameFromClassAttribute,
+				SystemStatusLabel: service.GetSystemLabelBySlugname(slugnameFromClassAttribute),
 			}
 			githubStatus = append(githubStatus, newGithubStatus)
 		}
